@@ -6,23 +6,36 @@
 #include <components/lighting/SpotLight.h>
 
 #include <utility>
+#include <array>
 
-static const char button_map[256] = {
-        [ SDL_BUTTON_LEFT   & 0xff ] =  MU_MOUSE_LEFT,
-        [ SDL_BUTTON_RIGHT  & 0xff ] =  MU_MOUSE_RIGHT,
-        [ SDL_BUTTON_MIDDLE & 0xff ] =  MU_MOUSE_MIDDLE,
-};
+static const std::array<char, 256> createButtonMap() {
+    std::array<char, 256> map{};
 
-static const char key_map[256] = {
-        [ SDLK_LSHIFT       & 0xff ] = MU_KEY_SHIFT,
-        [ SDLK_RSHIFT       & 0xff ] = MU_KEY_SHIFT,
-        [ SDLK_LCTRL        & 0xff ] = MU_KEY_CTRL,
-        [ SDLK_RCTRL        & 0xff ] = MU_KEY_CTRL,
-        [ SDLK_LALT         & 0xff ] = MU_KEY_ALT,
-        [ SDLK_RALT         & 0xff ] = MU_KEY_ALT,
-        [ SDLK_RETURN       & 0xff ] = MU_KEY_RETURN,
-        [ SDLK_BACKSPACE    & 0xff ] = MU_KEY_BACKSPACE,
-};
+    map[SDL_BUTTON_LEFT & 0xff] = MU_MOUSE_LEFT;
+    map[SDL_BUTTON_RIGHT & 0xff] = MU_MOUSE_RIGHT;
+    map[SDL_BUTTON_MIDDLE & 0xff] = MU_MOUSE_MIDDLE;
+
+    return map;
+}
+
+static const std::array<char, 256> button_map = createButtonMap();
+
+static const std::array<char, 256> createKeyMap() {
+    std::array<char, 256> map{};
+
+    map[SDLK_LSHIFT & 0xff] = MU_KEY_SHIFT;
+    map[SDLK_RSHIFT & 0xff] = MU_KEY_SHIFT;
+    map[SDLK_LCTRL & 0xff] = MU_KEY_CTRL;
+    map[SDLK_RCTRL & 0xff] = MU_KEY_CTRL;
+    map[SDLK_LALT & 0xff] = MU_KEY_ALT;
+    map[SDLK_RALT & 0xff] = MU_KEY_ALT;
+    map[SDLK_RETURN & 0xff] = MU_KEY_RETURN;
+    map[SDLK_BACKSPACE & 0xff] = MU_KEY_BACKSPACE;
+
+    return map;
+}
+
+static const std::array<char, 256> key_map = createKeyMap();
 
 int textWidth(mu_Font font, const char *text, int len) {
     if (len == -1) { len = strlen(text); }
@@ -189,7 +202,7 @@ void WorldEditor::objectTree(const std::shared_ptr<Object> &object) {
 
     if (mu_begin_treenode(ctx, object->name().str().c_str())) {
 
-        mu_layout_row(ctx, 1, (int[]) { 200 }, 0);
+        mu_layout_row(ctx, 1,std::array<int, 1>{200}.data(), 0);
         if (object != _world && mu_button_ex(ctx, "Select the whole group", MU_ICON_CHECK, 1)) {
             _selectedObject = object;
         }
@@ -200,7 +213,7 @@ void WorldEditor::objectTree(const std::shared_ptr<Object> &object) {
                 // We need to recursively continue to draw subgroup
                 objectTree(obj);
             } else {
-                mu_layout_row(ctx, 1, (int[]) { 200 }, 0);
+                mu_layout_row(ctx, 1, std::array<int, 1>{200}.data(), 0);
                 if (mu_button(ctx, objTag.str().c_str())) {
                     _selectedObject = obj;
                 }
@@ -225,7 +238,7 @@ void WorldEditor::transformMatrixEditor() {
         mu_text(ctx, ("X / Y / Z: " + std::to_string(pos.x()) + " / " + std::to_string(pos.y()) + " / " +
                       std::to_string(pos.z())).c_str());
 
-        mu_layout_row(ctx, 3, (int[]) {60, 60, 60}, 0);
+        mu_layout_row(ctx, 3,std::array<int, 3>{60, 60, 60}.data(), 0);
         if (mu_button(ctx, "Translate")) { _operationTransformMatrix = 0; }
         if (mu_button(ctx, "Scale")) { _operationTransformMatrix = 1; }
         if (mu_button(ctx, "Rotate")) { _operationTransformMatrix = 2; }
@@ -237,7 +250,7 @@ void WorldEditor::transformMatrixEditor() {
         switch (_operationTransformMatrix) {
             case 0:
                 mu_layout_begin_column(ctx);
-                mu_layout_row(ctx, 2, (int[]) {70, 150}, 0);
+                mu_layout_row(ctx, 2,std::array<int, 2>{70, 150}.data(), 0);
                 mu_label(ctx, "Translate X:");
                 mu_slider(ctx, &x, -30, 30);
                 mu_label(ctx, "Translate Y:");
@@ -249,7 +262,7 @@ void WorldEditor::transformMatrixEditor() {
                 break;
             case 1:
                 mu_layout_begin_column(ctx);
-                mu_layout_row(ctx, 2, (int[]) {70, 150}, 0);
+                mu_layout_row(ctx, 2, std::array<int, 2>{70, 150}.data(), 0);
                 mu_label(ctx, "Scale X:");
                 mu_slider(ctx, &x, -3, 3);
                 mu_label(ctx, "Scale Y:");
@@ -263,7 +276,7 @@ void WorldEditor::transformMatrixEditor() {
                 break;
             case 2:
                 mu_layout_begin_column(ctx);
-                mu_layout_row(ctx, 2, (int[]) {70, 150}, 0);
+            mu_layout_row(ctx, 2, std::array<int, 2>{70, 150}.data(), 0);
                 mu_label(ctx, "Rotate X:");
                 mu_slider(ctx, &x, -3, 3);
                 mu_label(ctx, "Rotate Y:");
@@ -276,7 +289,7 @@ void WorldEditor::transformMatrixEditor() {
                 break;
         }
 
-        mu_layout_row(ctx, 1, (int[]) {120}, 0);
+        mu_layout_row(ctx, 1,std::array<int, 1>{120}.data(), 0);
         if (mu_button(ctx, "Undo Transform")) {
             transformMatrix->transform(_selectedObject->getComponent<TransformMatrix>()->invModel());
         }
@@ -311,7 +324,7 @@ void WorldEditor::triangleMeshEditor() {
             mu_label(ctx, "Ambient color");
 
             mu_layout_begin_column(ctx);
-            mu_layout_row(ctx, 2, (int[]) { 46, -1 }, 0);
+            mu_layout_row(ctx, 2,std::array<int, 2>{46, -1}.data(), 0);
             mu_label(ctx, "Red:");   mu_slider(ctx, &color[0], 0, 255);
             mu_label(ctx, "Green:"); mu_slider(ctx, &color[1], 0, 255);
             mu_label(ctx, "Blue:");  mu_slider(ctx, &color[2], 0, 255);
@@ -321,7 +334,7 @@ void WorldEditor::triangleMeshEditor() {
 
         float d = material->d();
         mu_layout_begin_column(ctx);
-        mu_layout_row(ctx, 2, (int[]) {100, 130}, 0);
+        mu_layout_row(ctx, 2,std::array<int, 2>{100, 130}.data(), 0);
         mu_label(ctx, "Transparency:"); mu_slider(ctx, &d, 0, 1);
         mu_layout_end_column(ctx);
         material->setTransparency(d);
@@ -352,7 +365,7 @@ void WorldEditor::lineMeshEditor() {
         mu_label(ctx, "Color");
 
         mu_layout_begin_column(ctx);
-        mu_layout_row(ctx, 2, (int[]) { 46, -1 }, 0);
+        mu_layout_row(ctx, 2, std::array<int, 2>{46, -1}.data(), 0);
         mu_label(ctx, "Red:");   mu_slider(ctx, &color[0], 0, 255);
         mu_label(ctx, "Green:"); mu_slider(ctx, &color[1], 0, 255);
         mu_label(ctx, "Blue:");  mu_slider(ctx, &color[2], 0, 255);
@@ -382,7 +395,7 @@ void WorldEditor::lightSourceEditor() {
 
 
         mu_layout_begin_column(ctx);
-        mu_layout_row(ctx, 2, (int[]) {70, 150}, 0);
+        mu_layout_row(ctx, 2, std::array<int, 2>{70, 150}.data(), 0);
         mu_label(ctx, "Intensity"); mu_slider(ctx, &intensity, 0, 15);
         mu_layout_end_column(ctx);
 
@@ -394,7 +407,7 @@ void WorldEditor::lightSourceEditor() {
         mu_label(ctx, "Light Color");
 
         mu_layout_begin_column(ctx);
-        mu_layout_row(ctx, 2, (int[]) { 46, -1 }, 0);
+        mu_layout_row(ctx, 2, std::array<int, 2>{46, -1}.data(), 0);
         mu_label(ctx, "Red:");   mu_slider(ctx, &color[0], 0, 255);
         mu_label(ctx, "Green:"); mu_slider(ctx, &color[1], 0, 255);
         mu_label(ctx, "Blue:");  mu_slider(ctx, &color[2], 0, 255);
@@ -409,7 +422,7 @@ void WorldEditor::lightSourceEditor() {
             float outerConeCos = spotLight->outerConeCos();
 
             mu_layout_begin_column(ctx);
-            mu_layout_row(ctx, 2, (int[]) {100, 100}, 0);
+            mu_layout_row(ctx, 2,std::array<int, 2>{100, 100}.data(), 0);
             mu_label(ctx, "Inner Cone Cos"); mu_slider(ctx, &innerConeCos, outerConeCos, 1);
             mu_label(ctx, "Outer Cone Cos"); mu_slider(ctx, &outerConeCos, 0, 1);
             mu_layout_end_column(ctx);
@@ -445,74 +458,94 @@ void WorldEditor::rigidObjectEditor() {
         rigidObject->setCollision(hasCollision);
 
         mu_layout_begin_column(ctx);
-        mu_layout_row(ctx, 2, (int[]) {100, 100}, 0);
+        mu_layout_row(ctx, 2, std::array<int, 2>{100, 100}.data(), 0);
         if (mu_button(ctx, "Velocity")) { _operationRigidObject = 0; }
         if (mu_button(ctx, "Acceleration")) { _operationRigidObject = 1; }
         if (mu_button(ctx, "Friction")) { _operationRigidObject = 2; }
         if (mu_button(ctx, "Inertia")) { _operationRigidObject = 3; }
         mu_layout_end_column(ctx);
 
-        switch (_operationRigidObject) {
-            case 0:
+       switch (_operationRigidObject) {
+    case 0:
+    {
+        static float velocity[3] = {
+            static_cast<float>(rigidObject->velocity().x()),
+            static_cast<float>(rigidObject->velocity().y()),
+            static_cast<float>(rigidObject->velocity().z())
+        };
 
-                static float velocity[3] = {static_cast<float>(rigidObject->velocity().x()),
-                                            static_cast<float>(rigidObject->velocity().y()),
-                                            static_cast<float>(rigidObject->velocity().z())};
+        mu_label(ctx, "Velocity");
+        mu_layout_begin_column(ctx);
+        mu_layout_row(ctx, 2, std::array<int, 2>{30, -1}.data(), 0);
+        mu_label(ctx, "Vx:");
+        mu_slider(ctx, &velocity[0], -50, 50);
+        mu_label(ctx, "Vy:");
+        mu_slider(ctx, &velocity[1], -50, 50);
+        mu_label(ctx, "Vz:");
+        mu_slider(ctx, &velocity[2], -50, 50);
+        mu_layout_end_column(ctx);
 
-                mu_label(ctx, "Velocity");
-                mu_layout_begin_column(ctx);
-                mu_layout_row(ctx, 2, (int[]) { 30, -1 }, 0);
-                mu_label(ctx, "Vx:");   mu_slider(ctx, &velocity[0], -50, 50);
-                mu_label(ctx, "Vy:"); mu_slider(ctx, &velocity[1], -50, 50);
-                mu_label(ctx, "Vz:");  mu_slider(ctx, &velocity[2], -50, 50);
-                mu_layout_end_column(ctx);
+        rigidObject->setVelocity(Vec3D(velocity[0], velocity[1], velocity[2]));
+        break;
+    }
 
-                rigidObject->setVelocity(Vec3D(velocity[0], velocity[1], velocity[2]));
-                break;
-            case 1:
-                static float acceleration[3] = {static_cast<float>(rigidObject->acceleration().x()),
-                                                static_cast<float>(rigidObject->acceleration().y()),
-                                                static_cast<float>(rigidObject->acceleration().z())};
+    case 1:
+    {
+        static float acceleration[3] = {
+            static_cast<float>(rigidObject->acceleration().x()),
+            static_cast<float>(rigidObject->acceleration().y()),
+            static_cast<float>(rigidObject->acceleration().z())
+        };
 
-                mu_label(ctx, "Acceleration");
-                mu_layout_begin_column(ctx);
-                mu_layout_row(ctx, 2, (int[]) { 30, -1 }, 0);
-                mu_label(ctx, "Ax:");   mu_slider(ctx, &acceleration[0], -50, 50);
-                mu_label(ctx, "Ay:"); mu_slider(ctx, &acceleration[1], -50, 50);
-                mu_label(ctx, "Az:");  mu_slider(ctx, &acceleration[2], -50, 50);
-                mu_layout_end_column(ctx);
+        mu_label(ctx, "Acceleration");
+        mu_layout_begin_column(ctx);
+        mu_layout_row(ctx, 2, std::array<int, 2>{30, -1}.data(), 0);
+        mu_label(ctx, "Ax:");
+        mu_slider(ctx, &acceleration[0], -50, 50);
+        mu_label(ctx, "Ay:");
+        mu_slider(ctx, &acceleration[1], -50, 50);
+        mu_label(ctx, "Az:");
+        mu_slider(ctx, &acceleration[2], -50, 50);
+        mu_layout_end_column(ctx);
 
-                rigidObject->setAcceleration(Vec3D(acceleration[0], acceleration[1], acceleration[2]));
+        rigidObject->setAcceleration(Vec3D(acceleration[0], acceleration[1], acceleration[2]));
+        break;
+    }
 
-                break;
-            case 2:
-                static float stat = rigidObject->staticFriction();
-                static float dynam = rigidObject->dynamicFriction();
+    case 2:
+    {
+        static float stat = rigidObject->staticFriction();
+        static float dynam = rigidObject->dynamicFriction();
 
-                mu_label(ctx, "Friction");
-                mu_layout_begin_column(ctx);
-                mu_layout_row(ctx, 2, (int[]) { 60, -1 }, 0);
-                mu_label(ctx, "Static:");   mu_slider(ctx, &stat, dynam, 1);
-                mu_label(ctx, "Dynamic:"); mu_slider(ctx, &dynam, 0, 1);
-                mu_layout_end_column(ctx);
+        mu_label(ctx, "Friction");
+        mu_layout_begin_column(ctx);
+        mu_layout_row(ctx, 2, std::array<int, 2>{60, -1}.data(), 0);
+        mu_label(ctx, "Static:");
+        mu_slider(ctx, &stat, dynam, 1);
+        mu_label(ctx, "Dynamic:");
+        mu_slider(ctx, &dynam, 0, 1);
+        mu_layout_end_column(ctx);
 
-                rigidObject->setStaticFriction(stat);
-                rigidObject->setDynamicFriction(dynam);
+        rigidObject->setStaticFriction(stat);
+        rigidObject->setDynamicFriction(dynam);
+        break;
+    }
 
-                break;
-            case 3:
-                static float mass = rigidObject->mass();
+    case 3:
+    {
+        static float mass = rigidObject->mass();
 
-                mu_label(ctx, "Inertia");
-                mu_layout_begin_column(ctx);
-                mu_layout_row(ctx, 2, (int[]) { 60, -1 }, 0);
-                mu_label(ctx, "Mass:");   mu_slider(ctx, &mass, 0, 100);
-                mu_layout_end_column(ctx);
+        mu_label(ctx, "Inertia");
+        mu_layout_begin_column(ctx);
+        mu_layout_row(ctx, 2, std::array<int, 2>{60, -1}.data(), 0);
+        mu_label(ctx, "Mass:");
+        mu_slider(ctx, &mass, 0, 100);
+        mu_layout_end_column(ctx);
 
-                rigidObject->setMass(mass);
-
-                break;
-        }
+        rigidObject->setMass(mass);
+        break;
+    }
+}
 
         mu_end_treenode(ctx);
     }
@@ -530,7 +563,7 @@ void WorldEditor::objectEditor() {
         lightSourceEditor();
         rigidObjectEditor();
 
-        mu_layout_row(ctx, 1, (int[]) {120}, 0);
+        mu_layout_row(ctx, 1, std::array<int, 1>{120}.data(), 0);
         if (mu_button(ctx, "Delete object")) {
             _world->remove(_selectedObject->name());
             _selectedObject.reset();
@@ -556,7 +589,7 @@ void WorldEditor::renderSettings() {
             mu_checkbox(ctx, "Exact lighting", &_enableTrueLighting);
 
             mu_layout_begin_column(ctx);
-            mu_layout_row(ctx, 2, (int[]) { 70, 150 }, 0);
+            mu_layout_row(ctx, 2, std::array<int, 2>{70, 150}.data(), 0);
             mu_label(ctx, "LOD near");   mu_slider(ctx, &_lightingLODNearDistance, 0, 100);
             mu_label(ctx, "LOD far"); mu_slider(ctx, &_lightingLODFarDistance, _lightingLODNearDistance, _lightingLODNearDistance+100);
             mu_layout_end_column(ctx);

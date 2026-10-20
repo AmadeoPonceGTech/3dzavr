@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <utility>
 #include <cmath>
+#include <cstdio>
 
 #include "SDL.h"
 
@@ -15,8 +16,9 @@ extern "C" {
 #include "io/microui/microui.h"
 }
 
-#if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
+#if defined(_WIN32) || defined(WIN32) || (defined(__WIN32) && !defined(__CYGWIN__))
 #define popen _popen
+#define pclose _pclose
 #endif
 
 
@@ -373,9 +375,9 @@ inline double areaDuDv(const Vec3D& uv_hom,
 }
 
 struct Vec3DUint {
-    uint r = 0;
-    uint g = 0;
-    uint b = 0;
+    unsigned int r = 0;
+    unsigned int g = 0;
+    unsigned int b = 0;
 
     inline Vec3DUint& operator+=(const Vec3DUint& other) {
         r += other.r;
@@ -391,9 +393,9 @@ struct Vec3DUint {
     }
 
     [[nodiscard]] inline Vec3DUint operator*(double number) const {
-        return {static_cast<uint>(r*number),
-                static_cast<uint>(g*number),
-                static_cast<uint>(b*number)};
+        return {static_cast<unsigned int>(r * number),
+                static_cast<unsigned int>(g * number),
+                static_cast<unsigned int>(b * number)};
     }
 };
 
@@ -420,9 +422,9 @@ std::tuple<Vec3DUint, Vec3DUint, Vec3DUint> computeLightingForThreePoints(const 
         auto c2 = light->illuminate(Mtriangle.norm(), Vec3D(Mtriangle[1]), simplCoef);
         auto c3 = light->illuminate(Mtriangle.norm(), Vec3D(Mtriangle[2]), simplCoef);
 
-        l1 += {c1.r(), c1.g(), c1.b()};
-        l2 += {c2.r(), c2.g(), c2.b()};
-        l3 += {c3.r(), c3.g(), c3.b()};
+        l1 += Vec3DUint{c1.r(), c1.g(), c1.b()};
+        l2 += Vec3DUint{c2.r(), c2.g(), c2.b()};
+        l3 += Vec3DUint{c3.r(), c3.g(), c3.b()};
     }
 
     return {l1, l2, l3};
@@ -543,7 +545,7 @@ void Screen::drawTriangleWithLighting(const Triangle &projectedTriangle, const T
                     for (const auto &lightSource: lights) {
                         auto light = std::dynamic_pointer_cast<LightSource>(lightSource);
                         auto cl = light->illuminate(Mtriangle.norm(), Vec3D(dehomPixelPosition), 0);
-                        l += {cl.r(), cl.g(), cl.b()};
+                        l += Vec3DUint{cl.r(), cl.g(), cl.b()};
                     }
                 }
 
@@ -624,7 +626,7 @@ void Screen::drawTriangleWithLighting(const Triangle &projectedTriangle, const T
                     for (const auto &lightSource: lights) {
                         auto light = std::dynamic_pointer_cast<LightSource>(lightSource);
                         auto cl = light->illuminate(Mtriangle.norm(), Vec3D(dehomPixelPosition), 0);
-                        l += {cl.r(), cl.g(), cl.b()};
+                        l += Vec3DUint{cl.r(), cl.g(), cl.b()};
                     }
                 }
 
